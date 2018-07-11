@@ -5,10 +5,16 @@ client/dist/
 client/assets/bundle.*
 *.sqlite
 .env
+
 # VS Code
 launch.json
+
 # Google Cloud
 cloud_sql_proxy
 app.yaml
+
 # OS X
 .DS_Store
+
+# JetBrains
+.idea
