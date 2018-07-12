@@ -39,11 +39,16 @@
       <section class="account-item">
         <h2>Billing cycle</h2>
         <div class="details">
-          <p v-if="store.subscription">
-            You’ll be billed <span :class="{'full': extraRequests > 0}" 
-              v-text="nextBillingEstimate"></span> on {{nextBillingCycle}}.
+          <p v-if="store.subscription && store.billingThreshold">
+            You’ll be billed <span :class="{'full': extraRequests > 0}" v-text="nextBillingEstimate"></span>
+            on {{nextBillingCycle}}, or the amount of your additional requests exceeds
+            <span :class="{'full': extraRequests > 0}" v-text="billingThreshold"></span>.
+          <p v-else-if="store.subscription">
+            You’ll be billed <span :class="{'full': extraRequests > 0}" v-text="nextBillingEstimate"></span>
+            on {{nextBillingCycle}}.
+          <p v-else>
+            You don’t have an active subscription.
           </p>
-          <p v-else>You don’t have an active subscription.</p>
         </div>
         <button v-if="store.subscription" class="update" @click.prevent="cancelSubscription()">Cancel</button>
       </section>
@@ -101,6 +106,19 @@
 import axios from 'axios';
 import store from '../store';
 
+function formatCurrency(amount) {
+  if (amount == null) {
+    return null;
+  }
+
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  });
+
+  return formatter.format(amount);
+}
+
 export default {
   name: 'Account',
   data() {
@@ -142,16 +160,11 @@ export default {
       if (!store.subscription) {
         return null;
       }
-      // Format the number as currency
-      const formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      });
-      const estimate = store.nextBillingEstimate;
-      if (estimate) {
-        return formatter.format(estimate);
-      }
-      return null;
+      return formatCurrency(store.nextBillingEstimate);
+    },
+    billingThreshold: function() {
+      // TODO Read from store.subscription
+      return formatCurrency(store.billingThreshold);
     },
     // The current subscription's monthly plan
     currentPlan: function() {
@@ -294,6 +307,7 @@ button.upgrade {
   font-weight: 500;
   font-size: 15px;
   flex-basis: 140px;
+  min-width: 140px;
   padding-right: 0;
 }
 

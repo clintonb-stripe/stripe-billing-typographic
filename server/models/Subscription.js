@@ -42,6 +42,7 @@ class Subscription extends Model {
   }
 
   constructor(opts) {
+    // TODO Store billing threshold
     super(opts);
     this.id = opts.id;
     this.stripeId = opts.stripeId;
@@ -138,6 +139,7 @@ class Subscription extends Model {
           },
         ],
       };
+
       // If we have a payment source, charge it
       // automatically. Otherwise, we send a hosted invoice via email.
       if (customer.sourceId) {
@@ -146,6 +148,14 @@ class Subscription extends Model {
         stripeSub.billing = 'send_invoice';
         stripeSub.days_until_due = 30;
       }
+
+      // Define billing thresholds, if enabled
+      if (process.env.ENABLE_BILLING_THRESHOLDS === 'true') {
+          stripeSub.billing_thresholds = {
+              amount_gte: process.env.BILLING_THRESHOLD_AMOUNT,
+          };
+      }
+
       // Stripe: Create the subscription
       const stripeSubscription = await stripe.subscriptions.create(stripeSub);
 
@@ -199,6 +209,7 @@ class Subscription extends Model {
         );
       }
 
+      // TODO Set billing thresholds
       // Stripe: update the subscription
       const updatedStripe = await stripe.subscriptions.update(this.stripeId, {
         cancel_at_period_end: false,

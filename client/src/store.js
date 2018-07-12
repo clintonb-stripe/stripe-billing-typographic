@@ -114,6 +114,7 @@ const store = {
   subscription: null,
   source: null,
   nextBillingEstimate: null,
+  billingThreshold: null,
   logout() {
     // Clear the user's authentication credentials
     auth.logout();
@@ -141,11 +142,12 @@ const store = {
     ];
     return quotes[Math.floor(Math.random() * quotes.length)];
   },
-  // Get the Stripe public key, used for Stripe Elements
-  async getStripeKey() {
+  // Get the Stripe public key, used for Stripe Elements, and other configuration
+  async loadEnvironmentData() {
     try {
       const response = await axios.get('/api/environment');
       store.stripe = Stripe(response.data.stripePublicKey);
+      store.billingThreshold = response.data.billingThreshold / 100;
     } catch (e) {
       console.log(`Could not get Stripe key`, e);
     }
@@ -221,8 +223,10 @@ const store = {
 // Use a random quote for the default font sample
 store.defaultFontSample = store.randomQuote();
 store.fontSample = store.defaultFontSample;
-// Get the Stripe key
-store.getStripeKey();
+
+// Get the Stripe key and other configuration
+store.loadEnvironmentData();
+
 // If we have a JWT stored, add a header all requests identifying the user
 auth.setHeader();
 

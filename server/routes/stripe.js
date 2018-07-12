@@ -22,10 +22,12 @@ const stripe = require('stripe')(config.stripe.secretKey);
 const Account = require('../models/Account');
 const Customer = require('../models/Customer');
 const Subscription = require('../models/Subscription');
-const Plan = require('../models/Plan');
 
 router.get('/environment', async (req, res, next) => {
-  return res.send({stripePublicKey: config.stripe.publicKey});
+  return res.send({
+    stripePublicKey: config.stripe.publicKey,
+    billingThreshold: process.env.ENABLE_BILLING_THRESHOLDS === 'true' ? Number.parseInt(process.env.BILLING_THRESHOLD_AMOUNT) : null,
+  });
 });
 
 // Get the account for this user

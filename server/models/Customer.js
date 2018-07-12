@@ -83,6 +83,10 @@ class Customer extends Model {
       if (!subscription) {
         return null;
       }
+
+      // TODO Read usage from Stripe
+      // const usageRecord = await stripe.subscription_items.retrieve(stripeSub);
+
       return new Subscription(subscription);
     } catch (e) {
       throw new Error(e);

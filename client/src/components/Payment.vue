@@ -78,7 +78,7 @@ export default {
   },
   async created() {
     if (!store.stripe) {
-      await store.getStripeKey();
+      await store.loadEnvironmentData();
     }
   },
   mounted() {
